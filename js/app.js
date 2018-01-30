@@ -16,7 +16,16 @@ function initMap() {
 
 $(function () {
     initMap();
+    var isShowSearch = false;
     $('.show-search').click(function () {
-        $('.search-bar').toggle();
+        if (isShowSearch){
+            $('.search-bar').hide();
+            $('.map-body').removeClass('col-md-9 col-xs-6');
+            isShowSearch = false;
+        }else{
+            $('.search-bar').show();
+            $('.map-body').addClass('col-md-9 col-xs-6');
+            isShowSearch = true;
+        }
     });
 });
