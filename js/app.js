@@ -1,10 +1,14 @@
 
 var map;
+var localMark = [];
+var markerList = [];
+var centerPos;
 
 
 function appViewModel() {
     var self = this;
     self.markList = ko.observableArray();
+
 }
 var viewModel = new appViewModel();
 
@@ -40,6 +44,8 @@ function initMap() {
         map.addControl(geolocation);
         geolocation.getCurrentPosition(function (status,result) {
             if (status === 'complete'){
+                centerPos = result.position;
+                addCircel(result.position);
                 getMarks(result.position);
             }
         });
@@ -49,26 +55,72 @@ function initMap() {
     });
 }
 
+function addCircel(position) {
+    var circle = new AMap.Circle({
+        center: position,
+        radius: 200,
+        fillOpacity:0.2,
+        strokeWeight:1
+    });
+    circle.setMap(map);
+}
+
 function getMarks(position) {
     AMap.service('AMap.PlaceSearch',function () {
         var placeSearch = new AMap.PlaceSearch({
             type:"餐饮服务",
-            pageSize: 30,
+            pageSize: 30
         });
 
         placeSearch.searchNearBy("", position, 200, function(status, result) {
             if (status === 'complete' && result.info === 'OK') {
-                makeMenu(result.poiList.pois);
+                localMark = result.poiList.pois;
+                makeMenu(localMark);
             }
         });
     });
 }
 
+function makeMarker(mark) {
+        var  marker = new AMap.Marker({
+            position:[mark.location.lng,mark.location.lat],
+            content:'<i class="fa fa-cutlery" aria-hidden="true" style="color:#8B4726;font-size:1.5em;"></i>',
+            animation:"AMAP_ANIMATION_DROP",
+            title:mark.name,
+            clickable:true
+        });
+        marker.on('mouserover',function () {
+
+        });
+        return marker;
+}
+
+function bindMenuAndMarkerClick(menu,marker) {
+    function clickEvent() {
+        var cnt = [];
+        cnt.push(menu.name);
+        cnt.push(menu.address);
+        var info = new AMap.InfoWindow({
+            content:cnt.join("<br>"),
+            offset: new AMap.Pixel(10, -30)
+        });
+        info.open(map,marker.getPosition());
+        map.setCenter(marker.getPosition());
+    }
+    marker.on('click',clickEvent);
+    menu.userClick = clickEvent;
+}
+
 function makeMenu(marks) {
     marks.forEach(function (mark) {
+        mark.marker = makeMarker(mark);
+        bindMenuAndMarkerClick(mark,mark.marker);
         viewModel.markList.push(mark);
+        mark.marker.setMap(map);
     });
 }
+
+
 
 $(function () {
     initMap();
@@ -85,4 +137,21 @@ $(function () {
             isShowSearch = true;
         }
     });
+    function searchHandle() {
+        var search = $('.search-line').val();
+        var reg = new RegExp(search);
+        viewModel.markList.removeAll();
+        localMark.forEach(function (t) {
+            if (t.name.match(reg)){
+                viewModel.markList.push(t);
+                t.marker.setMap(map);
+            }else{
+                map.remove(t.marker);
+            }
+            map.setCenter(centerPos);
+        });
+        return false;
+    }
+    $('.search-line').bind('input propertychange', searchHandle);
+    $('.search-btn').click(searchHandle);
 });
