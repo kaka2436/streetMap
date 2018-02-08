@@ -1,28 +1,39 @@
+// 地图对象
 var map;
+// 存储定位后获取的20个餐厅信息的数组
 var localMark = [];
+// 定位坐标，如果定位失败，则使用初始坐标
 var centerPos = [116.397428, 39.90923];
+// 获取地图上被点击的点标记
 var clickedMarker;
-
+// 定义knockout的监控对象
 function appViewModel() {
     var self = this;
+    // 定义侧边栏绑定的监控数组，值为localMark数组中被筛选过的值，随着搜索而变化
     self.markList = ko.observableArray();
-
 }
+
 var viewModel = new appViewModel();
 
+// 地图加载失败后的处理
 function errorHander() {
     alert('加载失败，请刷新重试');
 }
 
+// 绑定knockout监控对象
 ko.applyBindings(viewModel);
 
+// 地图加载成功之后的回调函数
 function initMap() {
+    //初始化高德地图提供的UI组件
     initAMapUI();
+    // 初始化地图
     map = new AMap.Map('map', {
         resizeEnable: true,
         zoom: 10,
         center: [121.49203, 31.34651]
     });
+    // 加载地图插件，如工具条、比例尺等
     AMap.plugin(['AMap.ToolBar', 'AMap.Scale', 'AMap.OverView', 'AMap.MapType'], function() {
         map.addControl(new AMap.ToolBar());
         map.addControl(new AMap.Scale());
@@ -31,6 +42,7 @@ function initMap() {
         }));
         map.addControl(new AMap.MapType);
     });
+    // 加载定位插件
     map.plugin('AMap.Geolocation', function() {
         geolocation = new AMap.Geolocation({
             enableHighAccuracy: true, //是否使用高精度定位，默认:true
@@ -46,19 +58,24 @@ function initMap() {
             zoomToAccuracy: true //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
         });
         map.addControl(geolocation);
+        // 定位完成后获取当前坐标
         geolocation.getCurrentPosition(function(status, result) {
             if (status === 'complete') {
                 centerPos = result.position;
+                // 添加定位点周边的圆形覆盖
                 addCircel(result.position);
+                //获取定位点周边的20个餐厅信息
                 getMarks(result.position);
             }
         });
+        // 定位失败的处理
         AMap.event.addListener(geolocation, 'error', function() {
             alert('无法定位您的位置');
         });
     });
 }
 
+//添加定位点周边的圆形覆盖的函数
 function addCircel(position) {
     var circle = new AMap.Circle({
         center: position,
@@ -69,6 +86,7 @@ function addCircel(position) {
     circle.setMap(map);
 }
 
+//获取定位点周边的20个餐厅信息的函数
 function getMarks(position) {
     AMap.service('AMap.PlaceSearch', function() {
         var placeSearch = new AMap.PlaceSearch({
@@ -85,16 +103,22 @@ function getMarks(position) {
     });
 }
 
+// 绑定侧边栏条目与点标记的点击事件
 function bindMenuAndMarkerClick(mark, marker) {
+    // 点击事件
     function clickEvent() {
+        // 获取当前点击的点标记
         clickedMarker = marker;
+        // 将除了当前点标记之外的点标记颜色设置为红色
         viewModel.markList().forEach(function(t) {
             t.marker.setIconStyle('red');
         });
+        // 构建信息窗体中的信息
         var cnt = [];
         cnt.push(mark.name);
         // cnt.push('<hr/>');
         cnt.push('地址：' + mark.address);
+        // 向flickr发送异步请求获取信息窗体中的照片
         $.ajax({
             url: 'https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=21bde2ab08a008cffb296ce1d3b7a56e&format=json&nojsoncallback=1&per_page=1',
             success: function(result) {
@@ -107,6 +131,7 @@ function bindMenuAndMarkerClick(mark, marker) {
                     offset: new AMap.Pixel(10, -30),
                     closeWhenClickMap: true
                 });
+                // 弹出信息窗体
                 info.open(map, marker.getPosition());
             },
             error: function() {
@@ -125,7 +150,7 @@ function bindMenuAndMarkerClick(mark, marker) {
     marker.on('click', clickEvent);
     mark.userClick = clickEvent;
 }
-
+// 获取定位点周边的餐厅信息后，构建点标记和侧边栏菜单
 function makeMenu(marks) {
     AMapUI.loadUI(['overlay/AwesomeMarker'],
         function(AwesomeMarker) {
@@ -165,8 +190,10 @@ function makeMenu(marks) {
 
 
 $(function() {
+    //获取定位点周边餐厅信息
     getMarks();
     var isShowSearch = false;
+    // 设置侧边栏的开合
     $('.show-search').click(function() {
         if (isShowSearch) {
             $('.search-bar').hide();
@@ -178,7 +205,7 @@ $(function() {
             isShowSearch = true;
         }
     });
-
+    // 设置搜索方法
     function searchHandle() {
         var search = $('.search-line').val();
         var reg = new RegExp(search);

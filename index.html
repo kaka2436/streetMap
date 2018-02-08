@@ -23,6 +23,7 @@
 <body>
 <div class="container-fluid">
     <div class="row">
+        <!--侧边栏-->
         <div class="col-md-3 col-xs-6 search-bar">
             <p class="title"><i class="fa fa-globe icon-large" aria-hidden="true"> 街区地图</i></p>
             <form class="navbar-form navbar-left" role="search">
@@ -31,13 +32,13 @@
                 </div>
                 <button type="submit" class="btn btn-default search-btn"><i class="fa fa-search"></i>搜索</button>
             </form>
-
             <div class="nav nav-pills nav-stacked markList" data-bind="foreach:markList">
                 <li data-bind="click:userClick">
                     <a class="mark-name" href="#" data-bind="text:name"></a>
                 </li>
             </div>
         </div>
+        <!--地图主体-->
         <div class="map-body">
             <nav class="navbar-bar navbar-default navbar-inverse no-radius">
                 <div class="container-fluid">
