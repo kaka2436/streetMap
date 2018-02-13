@@ -24,7 +24,7 @@
 <div class="container-fluid">
     <div class="row">
         <!--侧边栏-->
-        <div class="col-md-3 col-xs-6 search-bar">
+        <div class="col-md-3 col-xs-6 search-bar" data-bind="visible:openSideBar">
             <p class="title"><i class="fa fa-globe icon-large" aria-hidden="true"> 街区地图</i></p>
             <form class="navbar-form navbar-left" role="search">
                 <div class="form-group">
@@ -39,7 +39,7 @@
             </div>
         </div>
         <!--地图主体-->
-        <div class="map-body">
+        <div class="map-body" data-bind="css:{'col-md-9 col-xs-6':openSideBar}">
             <nav class="navbar-bar navbar-default navbar-inverse no-radius">
                 <div class="container-fluid">
                     <ul class="nav navbar-nav">

@@ -11,6 +11,7 @@ function appViewModel() {
     var self = this;
     // 定义侧边栏绑定的监控数组，值为localMark数组中被筛选过的值，随着搜索而变化
     self.markList = ko.observableArray();
+    self.openSideBar = ko.observable(false);
 }
 
 var viewModel = new appViewModel();
@@ -192,18 +193,9 @@ function makeMenu(marks) {
 $(function() {
     //获取定位点周边餐厅信息
     getMarks();
-    var isShowSearch = false;
     // 设置侧边栏的开合
     $('.show-search').click(function() {
-        if (isShowSearch) {
-            $('.search-bar').hide();
-            $('.map-body').removeClass('col-md-9 col-xs-6');
-            isShowSearch = false;
-        } else {
-            $('.search-bar').show();
-            $('.map-body').addClass('col-md-9 col-xs-6');
-            isShowSearch = true;
-        }
+        viewModel.openSideBar(!viewModel.openSideBar());
     });
     // 设置搜索方法
     function searchHandle() {
