@@ -63,9 +63,9 @@ function initMap() {
             if (status === 'complete') {
                 centerPos = result.position;
                 // 添加定位点周边的圆形覆盖
-                addCircel(result.position);
+                addCircel(centerPos);
                 //获取定位点周边的20个餐厅信息
-                getMarks(result.position);
+                getMarks(centerPos);
             }
         });
         // 定位失败的处理
@@ -120,7 +120,7 @@ function bindMenuAndMarkerClick(mark, marker) {
         cnt.push('地址：' + mark.address);
         // 向flickr发送异步请求获取信息窗体中的照片
         $.ajax({
-            url: 'https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=21bde2ab08a008cffb296ce1d3b7a56e&format=json&nojsoncallback=1&per_page=1',
+            url: 'https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=191e68c9edf1f0e2e58882d4bc080c9b&format=json&nojsoncallback=1&per_page=1',
             success: function(result) {
                 var imgObj = result.photos.photo[0];
                 var imgurl = 'https://' + 'farm' + imgObj.farm + '.staticflickr.com/' + imgObj.server + '/' + imgObj.id + '_' + imgObj.secret + '_s.jpg'
